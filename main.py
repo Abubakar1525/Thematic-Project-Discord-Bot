@@ -19,6 +19,13 @@ async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
 
 
+# --- Ping ---
+@bot.command()
+async def ping(ctx):
+    await ctx.send("pong")
+
+
+
 # --- Kick ---
 @bot.command()
 @commands.has_permissions(kick_members=True)
@@ -125,4 +132,4 @@ async def on_command_error(ctx, error):
         await ctx.send(f"An error occurred: {error}")
 
 
-bot.run(MTQ4NTI4ODYwNjI4ODU4MDY0OA.GO0zCK.pRwM5sCha73b341dkT4r7raZl2J95NK0KVxu8A)
+bot.run(TOKEN)
