@@ -1,0 +1,128 @@
+import discord
+from discord.ext import commands
+import asyncio
+from datetime import timedelta
+
+# Bot configuration
+TOKEN = "MTQ4NTI4ODYwNjI4ODU4MDY0OA.GO0zCK.pRwM5sCha73b341dkT4r7raZl2J95NK0KVxu8A"
+PREFIX = "!"
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
+
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+
+
+# --- Kick ---
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
+    await member.kick(reason=reason)
+    await ctx.send(f"Kicked {member.mention} | Reason: {reason}")
+
+
+# --- Ban ---
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
+    await member.ban(reason=reason)
+    await ctx.send(f"Banned {member.mention} | Reason: {reason}")
+
+
+# --- Unban ---
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, *, user: str):
+    banned_users = [entry async for entry in ctx.guild.bans()]
+    name, discriminator = user.split("#") if "#" in user else (user, None)
+
+    for ban_entry in banned_users:
+        if discriminator:
+            if ban_entry.user.name == name and ban_entry.user.discriminator == discriminator:
+                await ctx.guild.unban(ban_entry.user)
+                await ctx.send(f"Unbanned {ban_entry.user.mention}")
+                return
+        else:
+            if ban_entry.user.name == name:
+                await ctx.guild.unban(ban_entry.user)
+                await ctx.send(f"Unbanned {ban_entry.user.mention}")
+                return
+
+    await ctx.send("User not found in ban list.")
+
+
+# --- Timeout (mute) ---
+@bot.command()
+@commands.has_permissions(moderate_members=True)
+async def timeout(ctx, member: discord.Member, minutes: int, *, reason="No reason provided"):
+    duration = timedelta(minutes=minutes)
+    await member.timeout(duration, reason=reason)
+    await ctx.send(f"Timed out {member.mention} for {minutes} minute(s) | Reason: {reason}")
+
+
+# --- Remove timeout ---
+@bot.command()
+@commands.has_permissions(moderate_members=True)
+async def untimeout(ctx, member: discord.Member):
+    await member.timeout(None)
+    await ctx.send(f"Removed timeout from {member.mention}")
+
+
+# --- Purge messages ---
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def purge(ctx, amount: int):
+    if amount < 1 or amount > 100:
+        await ctx.send("Please provide a number between 1 and 100.")
+        return
+    deleted = await ctx.channel.purge(limit=amount + 1)  # +1 to include the command message
+    msg = await ctx.send(f"Deleted {len(deleted) - 1} message(s).")
+    await asyncio.sleep(3)
+    await msg.delete()
+
+
+# --- Warn (simple in-memory store) ---
+warnings = {}
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
+    guild_id = ctx.guild.id
+    user_id = member.id
+    warnings.setdefault(guild_id, {}).setdefault(user_id, []).append(reason)
+    count = len(warnings[guild_id][user_id])
+    await ctx.send(f"Warned {member.mention} (Warning #{count}) | Reason: {reason}")
+
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def warnings_list(ctx, member: discord.Member):
+    guild_id = ctx.guild.id
+    user_warnings = warnings.get(guild_id, {}).get(member.id, [])
+    if not user_warnings:
+        await ctx.send(f"{member.mention} has no warnings.")
+        return
+    warn_text = "\n".join(f"{i+1}. {w}" for i, w in enumerate(user_warnings))
+    await ctx.send(f"Warnings for {member.mention}:\n{warn_text}")
+
+
+# --- Error handling ---
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You don't have permission to use this command.")
+    elif isinstance(error, commands.MemberNotFound):
+        await ctx.send("Member not found.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"Missing argument: `{error.param.name}`")
+    else:
+        await ctx.send(f"An error occurred: {error}")
+
+
+bot.run(MTQ4NTI4ODYwNjI4ODU4MDY0OA.GO0zCK.pRwM5sCha73b341dkT4r7raZl2J95NK0KVxu8A)
