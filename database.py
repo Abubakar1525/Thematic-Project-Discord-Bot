@@ -26,6 +26,8 @@ def get_warnings(user_id):
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def add_warning(user_id, moderator_id, reason):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
