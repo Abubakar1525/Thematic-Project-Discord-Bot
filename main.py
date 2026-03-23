@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from database import init_db, add_warning
 import asyncio
 from datetime import timedelta
 
@@ -104,7 +105,17 @@ async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
     user_id = member.id
     warnings.setdefault(guild_id, {}).setdefault(user_id, []).append(reason)
     count = len(warnings[guild_id][user_id])
+    add_warning(member.id, ctx.author.id, reason)
     await ctx.send(f"Warned {member.mention} (Warning #{count}) | Reason: {reason}")
+    mod_log = discord.utils.get(ctx.guild.text_channels, name="mod-log")
+    if mod_log:
+        await mod_log.send(
+            f"[MOD ACTION]\n"
+            f"Moderator: {ctx.author}\n"
+            f"User: {member}\n"
+            f"Action: Warn\n"
+            f"Reason: {reason}"
+        )
 
 
 @bot.command()
@@ -132,4 +143,5 @@ async def on_command_error(ctx, error):
         await ctx.send(f"An error occurred: {error}")
 
 
+init_db()
 bot.run(TOKEN)
