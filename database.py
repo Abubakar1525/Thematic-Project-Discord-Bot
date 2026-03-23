@@ -17,7 +17,15 @@ def init_db():
     conn.commit()
     conn.close()
 
-def add_warning(user_id, moderator_id, reason):
+def get_warnings(user_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT reason, timestamp FROM warnings WHERE user_id = ? ORDER BY timestamp DESC
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""

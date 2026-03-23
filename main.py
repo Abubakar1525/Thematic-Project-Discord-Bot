@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from database import init_db, add_warning
+from database import init_db, add_warning, get_warnings
 import asyncio
 from datetime import timedelta
 
@@ -120,14 +120,13 @@ async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
-async def warnings_list(ctx, member: discord.Member):
-    guild_id = ctx.guild.id
-    user_warnings = warnings.get(guild_id, {}).get(member.id, [])
-    if not user_warnings:
+async def warnings(ctx, member: discord.Member):
+    rows = get_warnings(member.id)
+    if not rows:
         await ctx.send(f"{member.mention} has no warnings.")
         return
-    warn_text = "\n".join(f"{i+1}. {w}" for i, w in enumerate(user_warnings))
-    await ctx.send(f"Warnings for {member.mention}:\n{warn_text}")
+    warn_text = "\n".join(f"{reason} ({timestamp[:10]})" for reason, timestamp in rows)
+    await ctx.send(f"Warnings for {member.display_name}:\n{warn_text}")
 
 
 # --- Error handling ---
