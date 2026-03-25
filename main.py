@@ -85,12 +85,18 @@ async def untimeout(ctx, member: discord.Member):
 # --- Purge messages ---
 @bot.command()
 @commands.has_permissions(manage_messages=True)
-async def purge(ctx, amount: int):
-    if amount < 1 or amount > 100:
-        await ctx.send("Please provide a number between 1 and 100.")
+async def purge(ctx, amount: int = None):
+    if amount is None:
+        await ctx.send("Please provide a valid number.")
         return
-    deleted = await ctx.channel.purge(limit=amount + 1)  # +1 to include the command message
-    msg = await ctx.send(f"Deleted {len(deleted) - 1} message(s).")
+    if amount > 100:
+        await ctx.send("Max 100 messages.")
+        return
+    if amount < 1:
+        await ctx.send("Please provide a valid number.")
+        return
+    deleted = await ctx.channel.purge(limit=amount + 1)
+    msg = await ctx.send(f"Deleted {len(deleted) - 1} messages.")
     await asyncio.sleep(3)
     await msg.delete()
 
