@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from database import init_db, add_warning, get_warnings
+from database import init_db, add_warning, get_warnings, clear_warnings
 import asyncio
 from datetime import timedelta
 
@@ -127,6 +127,25 @@ async def warnings(ctx, member: discord.Member):
         return
     warn_text = "\n".join(f"{reason} ({timestamp[:10]})" for reason, timestamp in rows)
     await ctx.send(f"Warnings for {member.display_name}:\n{warn_text}")
+
+
+# --- Clear warnings ---
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def clearwarnings(ctx, member: discord.Member = None):
+    if member is None:
+        await ctx.send("Please mention a user. Usage: `!clearwarnings @user`")
+        return
+    clear_warnings(member.id)
+    await ctx.send(f"Warnings cleared for {member.display_name}.")
+    mod_log = discord.utils.get(ctx.guild.text_channels, name="mod-log")
+    if mod_log:
+        await mod_log.send(
+            f"[MOD ACTION]\n"
+            f"Moderator: {ctx.author}\n"
+            f"User: {member}\n"
+            f"Action: Clear Warnings"
+        )
 
 
 # --- Error handling ---
