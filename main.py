@@ -95,17 +95,13 @@ async def purge(ctx, amount: int):
     await msg.delete()
 
 
-# --- Warn (simple in-memory store) ---
-warnings = {}
-
+# --- Warn ---
 @bot.command()
 @commands.has_permissions(manage_messages=True)
 async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
-    guild_id = ctx.guild.id
-    user_id = member.id
-    warnings.setdefault(guild_id, {}).setdefault(user_id, []).append(reason)
-    count = len(warnings[guild_id][user_id])
     add_warning(member.id, ctx.author.id, reason)
+    rows = get_warnings(member.id)
+    count = len(rows)
     await ctx.send(f"Warned {member.mention} (Warning #{count}) | Reason: {reason}")
     mod_log = discord.utils.get(ctx.guild.text_channels, name="mod-log")
     if mod_log:
