@@ -96,9 +96,7 @@ async def purge(ctx, amount: int = None):
         await ctx.send("Please provide a valid number.")
         return
     deleted = await ctx.channel.purge(limit=amount + 1)
-    msg = await ctx.send(f"Deleted {len(deleted) - 1} messages.")
-    await asyncio.sleep(3)
-    await msg.delete()
+    await ctx.send(f"Deleted {len(deleted) - 1} messages.")
 
 
 # --- Warn ---
