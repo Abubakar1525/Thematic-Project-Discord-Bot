@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from database import init_db, add_warning, get_warnings, clear_warnings
+from filter_service import contains_banned_word
 import asyncio
 from datetime import timedelta
 
@@ -18,6 +19,20 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} (ID: {bot.user.id})")
+
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    if contains_banned_word(message.content):
+        await message.delete()
+        try:
+            await message.author.send(f"Your message in **{message.guild.name}** was removed for using banned words.")
+        except discord.Forbidden:
+            pass
+        return
+    await bot.process_commands(message)
 
 
 # --- Ping ---
