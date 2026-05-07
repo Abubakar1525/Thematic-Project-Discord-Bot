@@ -27,10 +27,16 @@ async def on_message(message):
         return
     if contains_banned_word(message.content):
         await message.delete()
+        add_warning(message.author.id, bot.user.id, "Automatic: banned word used")
+        rows = get_warnings(message.author.id)
+        count = len(rows)
         try:
-            await message.author.send(f"Your message in **{message.guild.name}** was removed for using banned words.")
+            await message.author.send(f"Your message in **{message.guild.name}** was removed for using banned words. You now have {count} warning(s).")
         except discord.Forbidden:
             pass
+        mod_log = discord.utils.get(message.guild.text_channels, name="mod-log")
+        if mod_log:
+            await mod_log.send(embed=mod_embed(f"Auto-Warn (#{count})", bot.user, message.author, "Banned word used"))
         return
     await bot.process_commands(message)
 
