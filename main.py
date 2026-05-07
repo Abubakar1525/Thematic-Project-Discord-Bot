@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
-from database import init_db, add_warning, get_warnings, clear_warnings
+from database import init_db, add_warning, get_warnings, clear_warnings, add_ban
 from filter_service import contains_banned_word
 import asyncio
 from datetime import timedelta
 
 # Bot configuration
-TOKEN = "MTQ4NTI4ODYwNjI4ODU4MDY0OA.GO0zCK.pRwM5sCha73b341dkT4r7raZl2J95NK0KVxu8A"
+TOKEN = ""
 PREFIX = "!"
 
 intents = discord.Intents.default()
@@ -72,6 +72,7 @@ async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
     await member.ban(reason=reason)
+    add_ban(member.id, ctx.author.id, reason)
     await ctx.send(embed=mod_embed("Ban", ctx.author, member, reason))
 
 
