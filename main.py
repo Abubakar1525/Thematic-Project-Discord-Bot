@@ -35,7 +35,18 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-# --- Ping ---
+def mod_embed(action, moderator, user, reason=None, color=discord.Color.red()):
+    embed = discord.Embed(title="Moderation Action", color=color)
+    embed.add_field(name="Action", value=action, inline=False)
+    embed.add_field(name="User", value=str(user), inline=True)
+    embed.add_field(name="Moderator", value=str(moderator), inline=True)
+    if reason:
+        embed.add_field(name="Reason", value=reason, inline=False)
+    embed.timestamp = discord.utils.utcnow()
+    return embed
+
+
+
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong")
@@ -47,7 +58,7 @@ async def ping(ctx):
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
     await member.kick(reason=reason)
-    await ctx.send(f"Kicked {member.mention} | Reason: {reason}")
+    await ctx.send(embed=mod_embed("Kick", ctx.author, member, reason))
 
 
 # --- Ban ---
@@ -55,7 +66,7 @@ async def kick(ctx, member: discord.Member, *, reason="No reason provided"):
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
     await member.ban(reason=reason)
-    await ctx.send(f"Banned {member.mention} | Reason: {reason}")
+    await ctx.send(embed=mod_embed("Ban", ctx.author, member, reason))
 
 
 # --- Unban ---
@@ -86,7 +97,7 @@ async def unban(ctx, *, user: str):
 async def timeout(ctx, member: discord.Member, minutes: int, *, reason="No reason provided"):
     duration = timedelta(minutes=minutes)
     await member.timeout(duration, reason=reason)
-    await ctx.send(f"Timed out {member.mention} for {minutes} minute(s) | Reason: {reason}")
+    await ctx.send(embed=mod_embed(f"Timeout ({minutes} min)", ctx.author, member, reason))
 
 
 # --- Remove timeout ---
@@ -94,7 +105,7 @@ async def timeout(ctx, member: discord.Member, minutes: int, *, reason="No reaso
 @commands.has_permissions(moderate_members=True)
 async def untimeout(ctx, member: discord.Member):
     await member.timeout(None)
-    await ctx.send(f"Removed timeout from {member.mention}")
+    await ctx.send(embed=mod_embed("Remove Timeout", ctx.author, member))
 
 
 # --- Purge messages ---
@@ -121,16 +132,10 @@ async def warn(ctx, member: discord.Member, *, reason="No reason provided"):
     add_warning(member.id, ctx.author.id, reason)
     rows = get_warnings(member.id)
     count = len(rows)
-    await ctx.send(f"Warned {member.mention} (Warning #{count}) | Reason: {reason}")
+    await ctx.send(embed=mod_embed(f"Warn (#{count})", ctx.author, member, reason))
     mod_log = discord.utils.get(ctx.guild.text_channels, name="mod-log")
     if mod_log:
-        await mod_log.send(
-            f"[MOD ACTION]\n"
-            f"Moderator: {ctx.author}\n"
-            f"User: {member}\n"
-            f"Action: Warn\n"
-            f"Reason: {reason}"
-        )
+        await mod_log.send(embed=mod_embed(f"Warn (#{count})", ctx.author, member, reason))
 
 
 @bot.command()
@@ -152,15 +157,10 @@ async def clearwarnings(ctx, member: discord.Member = None):
         await ctx.send("Please mention a user. Usage: `!clearwarnings @user`")
         return
     clear_warnings(member.id)
-    await ctx.send(f"Warnings cleared for {member.display_name}.")
+    await ctx.send(embed=mod_embed("Clear Warnings", ctx.author, member, color=discord.Color.green()))
     mod_log = discord.utils.get(ctx.guild.text_channels, name="mod-log")
     if mod_log:
-        await mod_log.send(
-            f"[MOD ACTION]\n"
-            f"Moderator: {ctx.author}\n"
-            f"User: {member}\n"
-            f"Action: Clear Warnings"
-        )
+        await mod_log.send(embed=mod_embed("Clear Warnings", ctx.author, member, color=discord.Color.green()))
 
 
 # --- Error handling ---

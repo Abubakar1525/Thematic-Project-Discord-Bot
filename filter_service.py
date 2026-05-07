@@ -1,6 +1,10 @@
 banned_words = [
-    "badword1",
-    "badword2",
+    "frick",
+    "shi",
+    "slur",
+    "burger",
+    "cheese"
+    
 ]
 
 def contains_banned_word(message: str) -> bool:
