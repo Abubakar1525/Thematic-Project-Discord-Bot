@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Word Filter - Bot Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Word Filter</h1>
+    <p>
+        These are the words defined in <code>filter_service.py</code> that
+        trigger an automatic warning and message deletion — see
+        <code>contains_banned_word()</code> in that file and the
+        <code>on_message</code> handler in <code>main.py</code> that calls it.
+        This list is read-only here; edit <code>filter_service.py</code> and
+        restart the bot to change it.
+    </p>
+    <ul class="word-list">
+        {% for word in words %}
+        <li>{{ word }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
