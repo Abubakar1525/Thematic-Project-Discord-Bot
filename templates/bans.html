@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Bans - Bot Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Bans</h1>
+    <p>Read-only — unbanning has to be done through Discord (the bot's <code>!unban</code> command).</p>
+
+    {% if bans %}
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Moderator ID</th>
+                <th>Reason</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {# Same tuple-unpacking pattern as warnings.html — see the
+               comment there for how `for a, b, c in rows` works in Jinja. #}
+            {% for id, user_id, moderator_id, reason, timestamp in bans %}
+            <tr>
+                <td>{{ user_id }}</td>
+                <td>{{ moderator_id }}</td>
+                <td>{{ reason }}</td>
+                <td>{{ timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No bans recorded yet.</p>
+    {% endif %}
+{% endblock %}

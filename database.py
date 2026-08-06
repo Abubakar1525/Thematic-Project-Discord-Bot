@@ -62,3 +62,34 @@ def add_warning(user_id, moderator_id, reason):
     """, (user_id, moderator_id, reason))
     conn.commit()
     conn.close()
+
+
+# --- Used by the web dashboard (dashboard.py) ---
+# get_warnings()/above only fetches rows for a single user, which is what the
+# Discord commands need. The dashboard needs to list everyone at once, so
+# these two functions skip the WHERE clause and return every row instead.
+
+def get_all_warnings():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, user_id, moderator_id, reason, timestamp
+        FROM warnings
+        ORDER BY timestamp DESC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_all_bans():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, user_id, moderator_id, reason, timestamp
+        FROM bans
+        ORDER BY timestamp DESC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

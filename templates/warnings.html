@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Warnings - Bot Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Warnings</h1>
+
+    {% if warnings %}
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Moderator ID</th>
+                <th>Reason</th>
+                <th>Timestamp</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {# `warnings` is the list of tuples returned by
+               database.get_all_warnings(): (id, user_id, moderator_id,
+               reason, timestamp). Jinja lets us unpack each tuple straight
+               into named loop variables, same as Python's `for a, b in x`. #}
+            {% for id, user_id, moderator_id, reason, timestamp in warnings %}
+            <tr>
+                <td>{{ user_id }}</td>
+                <td>{{ moderator_id }}</td>
+                <td>{{ reason }}</td>
+                <td>{{ timestamp }}</td>
+                <td>
+                    {# This form POSTs to /warnings/clear/<user_id> (see
+                       clear_user_warnings() in dashboard.py), which deletes
+                       every warning for that user and redirects back here.
+                       The confirm() dialog is a plain browser JS guard so a
+                       misclick doesn't wipe someone's history. #}
+                    <form method="post"
+                          action="{{ url_for('clear_user_warnings', user_id=user_id) }}"
+                          onsubmit="return confirm('Clear ALL warnings for user {{ user_id }}?');">
+                        <button type="submit">Clear all for user</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No warnings recorded yet.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{# {% extends %} pulls in templates/base.html and slots this page's content
+   into the {% block content %} placeholder defined there. #}
+{% extends "base.html" %}
+{% block title %}Overview - Bot Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Overview</h1>
+    <p>Snapshot of moderation activity, read straight from <code>warnings.db</code>.</p>
+
+    {# `stats` is the dict built in the index() view function in
+       dashboard.py: {"total_warnings": ..., "total_bans": ..., "banned_word_count": ...} #}
+    <div class="cards">
+        <div class="card">
+            <span class="card-number">{{ stats.total_warnings }}</span>
+            <span class="card-label">Total Warnings</span>
+        </div>
+        <div class="card">
+            <span class="card-number">{{ stats.total_bans }}</span>
+            <span class="card-label">Total Bans</span>
+        </div>
+        <div class="card">
+            <span class="card-number">{{ stats.banned_word_count }}</span>
+            <span class="card-label">Filtered Words</span>
+        </div>
+    </div>
+{% endblock %}

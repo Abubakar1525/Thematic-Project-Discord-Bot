@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The title block below lets each page set its own <title>; if a page
+         doesn't override it, "Bot Dashboard" is used as the default. -->
+    <title>{% block title %}Bot Dashboard{% endblock %}</title>
+    <!-- url_for('static', filename=...) builds the correct URL to a file in
+         the static/ folder, wherever this app ends up being hosted. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Shared top navigation. url_for('index') etc. build the link from the
+         route function's *name* in dashboard.py, not a hardcoded path, so
+         these links keep working even if a route's URL changes later. -->
+    <nav class="navbar">
+        <span class="brand">Sentinel Bot Dashboard</span>
+        <a href="{{ url_for('index') }}">Overview</a>
+        <a href="{{ url_for('warnings_page') }}">Warnings</a>
+        <a href="{{ url_for('bans_page') }}">Bans</a>
+        <a href="{{ url_for('filters_page') }}">Word Filter</a>
+    </nav>
+
+    <main>
+        <!-- get_flashed_messages() picks up any flash() call made in
+             dashboard.py during the request that led here (e.g. after
+             clearing a user's warnings) and shows it once. -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flash">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Each child template fills this block in with its own content. -->
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
