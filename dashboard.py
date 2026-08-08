@@ -26,9 +26,8 @@ on can see warning/ban history and clear warnings. That's fine for running
 it on your own machine, but do not expose it to the public internet as-is.
 """
 
-from flask import Flask, render_template, redirect, url_for, flash
-from database import init_db, get_all_warnings, get_all_bans, clear_warnings
-from filter_service import banned_words
+from flask import Flask, render_template, redirect, url_for, flash, request
+from database import init_db, get_all_warnings, get_all_bans, clear_warnings, get_banned_words, add_banned_word, remove_banned_word
 
 # ---------------------------------------------------------------------------
 # 1. App setup
@@ -67,7 +66,7 @@ def index():
     stats = {
         "total_warnings": len(warnings),
         "total_bans": len(bans),
-        "banned_word_count": len(banned_words),
+        "banned_word_count": len(get_banned_words()),
     }
     return render_template("index.html", stats=stats)
 
@@ -124,12 +123,26 @@ def bans_page():
 # ---------------------------------------------------------------------------
 @app.route("/filters")
 def filters_page():
-    """
-    Displays the banned_words list from filter_service.py — the list the
-    bot checks every message against inside on_message() in main.py.
-    Read-only here; to change it, edit filter_service.py and restart the bot.
-    """
-    return render_template("filters.html", words=banned_words)
+    words = get_banned_words()
+    return render_template("filters.html", words=words)
+
+
+@app.route("/filters/add", methods=["POST"])
+def add_filter():
+    word = request.form.get("word", "").strip()
+    if word:
+        add_banned_word(word)
+        flash(f'"{word}" added to the word filter.')
+    else:
+        flash("Please enter a word.")
+    return redirect(url_for("filters_page"))
+
+
+@app.route("/filters/remove/<int:word_id>", methods=["POST"])
+def remove_filter(word_id):
+    remove_banned_word(word_id)
+    flash("Word removed from filter.")
+    return redirect(url_for("filters_page"))
 
 
 # ---------------------------------------------------------------------------

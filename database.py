@@ -23,6 +23,12 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS banned_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word TEXT UNIQUE NOT NULL
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -93,3 +99,29 @@ def get_all_bans():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+
+def get_banned_words():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, word FROM banned_words ORDER BY word")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def add_banned_word(word):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO banned_words (word) VALUES (?)", (word.lower().strip(),))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass  # word already exists
+    conn.close()
+
+def remove_banned_word(word_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM banned_words WHERE id = ?", (word_id,))
+    conn.commit()
+    conn.close()

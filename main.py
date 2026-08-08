@@ -4,9 +4,11 @@ from database import init_db, add_warning, get_warnings, clear_warnings, add_ban
 from filter_service import contains_banned_word
 import asyncio
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
 
-# Bot configuration
-TOKEN = ""
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
 PREFIX = "!"
 
 intents = discord.Intents.default()
