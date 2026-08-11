@@ -28,6 +28,7 @@ it on your own machine, but do not expose it to the public internet as-is.
 
 from flask import Flask, render_template, redirect, url_for, flash, request
 from database import init_db, get_all_warnings, get_all_bans, clear_warnings, get_banned_words, add_banned_word, remove_banned_word
+import os
 
 # ---------------------------------------------------------------------------
 # 1. App setup
@@ -149,8 +150,4 @@ def remove_filter(word_id):
 # 6. Entry point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # debug=True gives auto-reload on code changes and detailed in-browser
-    # error pages, which is convenient while developing. Turn it off
-    # (debug=False) if you ever run this somewhere other than your own
-    # machine — debug mode can let visitors execute arbitrary code.
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
