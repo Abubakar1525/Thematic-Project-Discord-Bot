@@ -1,3 +1,4 @@
+[![Run Tests](https://github.com/Abubakar1525/Thematic-Project-Discord-Bot/actions/workflows/tests.yml/badge.svg)](https://github.com/Abubakar1525/Thematic-Project-Discord-Bot/actions/workflows/tests.yml)
 # Thematic-Project-Discord-Bot
 Making a discord bot for uni
 
