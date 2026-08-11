@@ -15,3 +15,8 @@ python dashboard.py
 
 Then open http://127.0.0.1:5000. See the comments at the top of
 `dashboard.py` for how each part works.
+
+**Note:** `warnings.db` may be empty or nearly empty on a fresh clone, which
+makes the dashboard look bare. Run `python seed_data.py` to fill it with a
+handful of realistic sample warnings and a ban so there's something to look
+at. See `seed_data.py` for what it inserts — it's safe to re-run.
