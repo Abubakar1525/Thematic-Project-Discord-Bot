@@ -29,6 +29,9 @@ it on your own machine, but do not expose it to the public internet as-is.
 from flask import Flask, render_template, redirect, url_for, flash, request
 from database import init_db, get_all_warnings, get_all_bans, clear_warnings, get_banned_words, add_banned_word, remove_banned_word
 import os
+from seed_data import seed
+
+seed()  # runs on every startup — safe, since seed() wipes and reinserts each time
 
 # ---------------------------------------------------------------------------
 # 1. App setup
